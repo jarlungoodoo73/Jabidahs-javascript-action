@@ -1,17 +1,17 @@
 {
   "name": "javascript-action",
-  "description": "GitHub Actions JavaScript Template",
-  "version": "0.0.0",
-  "author": "",
+  "description": "GitHub Actions JavaScript Template with comprehensive testing and validation",
+  "version": "1.0.0",
+  "author": "GitHub Actions Community",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/actions/javascript-action#readme",
+  "homepage": "https://github.com/jarlungoodoo73/Jabidahs-javascript-action#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "url": "git+https://github.com/jarlungoodoo73/Jabidahs-javascript-action.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
+    "url": "https://github.com/jarlungoodoo73/Jabidahs-javascript-action/issues"
   },
   "keywords": [
     "actions"
