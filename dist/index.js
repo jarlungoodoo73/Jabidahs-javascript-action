@@ -27256,12 +27256,21 @@ var coreExports = requireCore();
 /**
  * Waits for a number of milliseconds.
  *
- * @param {number} milliseconds The number of milliseconds to wait.
+ * @param {number} milliseconds The number of milliseconds to wait. Must be a non-negative number.
  * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
+ * @throws {Error} If milliseconds is not a number or is negative.
  */
 async function wait(milliseconds) {
-  return new Promise((resolve) => {
-    if (isNaN(milliseconds)) throw new Error('milliseconds is not a number')
+  return new Promise((resolve, reject) => {
+    if (isNaN(milliseconds)) {
+      reject(new Error('milliseconds is not a number'));
+      return
+    }
+
+    if (milliseconds < 0) {
+      reject(new Error('milliseconds cannot be negative'));
+      return
+    }
 
     setTimeout(() => resolve('done!'), milliseconds);
   })
@@ -27274,18 +27283,44 @@ async function wait(milliseconds) {
  */
 async function run() {
   try {
-    const ms = coreExports.getInput('milliseconds');
+    const ms = coreExports.getInput('milliseconds', { required: true });
+
+    // Parse and validate the input
+    const parsedMs = parseInt(ms, 10);
+
+    if (isNaN(parsedMs)) {
+      throw new Error(
+        `Invalid milliseconds value: "${ms}". Must be a valid number.`
+      )
+    }
+
+    if (parsedMs < 0) {
+      throw new Error(`Milliseconds cannot be negative. Received: ${parsedMs}`)
+    }
+
+    if (parsedMs > 60000) {
+      coreExports.warning(
+        `Long wait time: ${parsedMs}ms (${parsedMs / 1000}s). Consider reducing if possible.`
+      );
+    }
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    coreExports.debug(`Waiting ${ms} milliseconds ...`);
+    coreExports.debug(`Waiting ${parsedMs} milliseconds ...`);
 
     // Log the current timestamp, wait, then log the new timestamp
-    coreExports.debug(new Date().toTimeString());
-    await wait(parseInt(ms, 10));
-    coreExports.debug(new Date().toTimeString());
+    const startTime = new Date();
+    coreExports.debug(`Start time: ${startTime.toTimeString()}`);
+
+    await wait(parsedMs);
+
+    const endTime = new Date();
+    coreExports.debug(`End time: ${endTime.toTimeString()}`);
 
     // Set outputs for other workflow steps to use
-    coreExports.setOutput('time', new Date().toTimeString());
+    coreExports.setOutput('time', endTime.toTimeString());
+
+    // Log success
+    coreExports.info(`Successfully waited ${parsedMs}ms`);
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) coreExports.setFailed(error.message);
